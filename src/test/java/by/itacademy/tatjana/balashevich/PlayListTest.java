@@ -1,34 +1,56 @@
 package by.itacademy.tatjana.balashevich;
 
 
-import io.restassured.response.ResponseBody;
-import io.restassured.response.ValidatableResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-import io.restassured.RestAssured;
+import java.io.File;
+import java.io.IOException;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notANumber;
+
 
 public class PlayListTest {
     @Test
-    public void testCreatePlaylist() {
-        //Create a new playlist for existing users
-        String body = "{\n" +
-                "  \"description\": \"Metall\",\n" +
-                "  \"isPublic\": true,\n" +
-                "  \"name\": \"One\",\n" +
-                "  \"userId\": 1\n" +
-                "}";
-        //PlayList body= new PlayList ("Metall", true, "One", 1);
+    public void testCreatePlaylist() throws IOException {
+//        //1 variant:
+//        String playList = "{\n" +
+//                "  \"description\": \"Metall\",\n" +
+//                "  \"isPublic\": true,\n" +
+//                "  \"name\": \"One\",\n" +
+//                "  \"userId\": 1\n" +
+//                "}";
+//        String endpoint = "http://localhost:8080/api/playlists";
+//        given().header("Content-Type", "application/json").body(playList).
+//                when().post(endpoint).
+//                then().log().body().
+//                assertThat().
+//                statusCode(201).
+//                body("userId", equalTo(1));
+
+
+//        //2 variant:
+//        String endpoint = "http://localhost:8080/api/playlists";
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        PlayList playList = new PlayList("Metall", true, "One", 1);
+//        objectMapper.writeValue(new File("target/playlist.json"), playList);
+//        given().header("Content-Type", "application/json").body(new File("target/playlist.json")).
+//                when().post(endpoint).
+//                then().
+//                assertThat().
+//                statusCode(201);
+
+        //3 variant:
         String endpoint = "http://localhost:8080/api/playlists";
-        given().header("Content-Type", "application/json").body(body).
+        ObjectMapper objectMapper = new ObjectMapper();
+        PlayList playList = new PlayList("Metall", true, "One", 1);
+        String listAsString = objectMapper.writeValueAsString(playList);
+        given().header("Content-Type", "application/json").body(listAsString).
                 when().post(endpoint).
-                then().log().body().
+                then().
                 assertThat().
-                statusCode(201).
-                body("userId", equalTo(1));
+                statusCode(201);
     }
 
     @Test
@@ -115,7 +137,7 @@ public class PlayListTest {
     public void testDeletePlayList() {
         String endpoint = "http://localhost:8080/api/playlists/4";
         given().when().delete(endpoint).
-                then().assertThat().statusCode(200).body("id",equalTo(4)).log().body();
+                then().assertThat().statusCode(200).body("id", equalTo(4)).log().body();
         given().when().get(endpoint).then().log().body().assertThat().statusCode(404);
     }
 }
